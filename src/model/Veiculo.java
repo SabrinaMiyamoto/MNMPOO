@@ -10,7 +10,8 @@ public class Veiculo implements IDados {
     private Cor cor;
     private Cliente cliente;
 
-    public Veiculo() {}
+    public Veiculo() {
+    }
 
     public Veiculo(String placa) {
         this.placa = placa;
@@ -23,12 +24,9 @@ public class Veiculo implements IDados {
 
     @Override
     public String getDados() {
-
-        String dados =
-                "Placa: " + placa;
+        String dados = "Placa: " + placa;
 
         if (modelo != null) {
-
             dados += "\nModelo: " + modelo.getDescricao();
 
             if (modelo.getMarca() != null) {
@@ -44,7 +42,6 @@ public class Veiculo implements IDados {
             }
         }
 
-        // Professor, eu sei que no Mão na massa não pedi, mas como na minha tela tem a cor, modelo e observações, eu achei melhor deixar para na integração não ficar batendo cabeça rs
         if (cor != null) {
             dados += "\nCor: " + cor.getNome();
         }
@@ -59,9 +56,18 @@ public class Veiculo implements IDados {
 
         return dados;
     }
+
     @Override
     public String getDados(String observacao) {
         return getDados() + "\nObservação adicional: " + observacao;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPlaca() {

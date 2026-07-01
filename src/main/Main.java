@@ -3,12 +3,14 @@ package main;
 import model.*;
 import enums.*;
 import interfaces.IDados;
+import interfaces.ImpressaoOS;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class Main {
 
@@ -16,6 +18,25 @@ public class Main {
         Scanner leitor = new Scanner(System.in);
         List<Cliente> listaClientes = new ArrayList<>();
         DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        System.out.println("=================================");
+        System.out.println("   TESTE DE EXCEÇÃO AUTOMÁTICO   ");
+        System.out.println("=================================");
+        System.out.println("Tentando calcular uma Ordem de Serviço sem nenhum serviço cadastrado...");
+
+        try {
+            Cliente clienteTeste = new PessoaFisica("Cliente Teste", "000.000.000-00", LocalDate.now());
+            Veiculo veiculoTeste = new Veiculo("AAA-0000", new Modelo("Modelo Teste", new Marca("Marca Teste"), Categoria.PADRAO, 100, Combustivel.FLEX));
+            OrdemServico osTeste = new OrdemServico(999L, 0, Status.ABERTA, new Date(), veiculoTeste);
+
+            osTeste.calcularServico();
+        } catch (ExceptionLavacao e) {
+            System.out.println("\n>>Exceção capturada no início do programa!");
+            System.out.println(">> Mensagem do erro: " + e.getMessage());
+            System.out.println("=================================\n");
+        }
+
+        System.out.println("Agora, vamos iniciar o fluxo normal do sistema:\n");
 
         int quantity = 0;
         while (quantity <= 0) {
@@ -64,12 +85,12 @@ public class Main {
             if (tipo == 1) {
                 String cpfBruto = "";
                 while (true) {
-                    System.out.print("CPF: ");
-                    cpfBruto = leitor.nextLine().replaceAll("\\D", "");
+                    System.out.print("CPF (apenas 11 números): ");
+                    cpfBruto = leitor.nextLine();
                     if (cpfBruto.matches("\\d{11}")) {
                         break;
                     } else {
-                        System.out.println(">> Erro: O CPF deve conter exatamente 11 números.");
+                        System.out.println(">> Erro: O CPF deve conter exatamente 11 números, sem letras ou símbolos.");
                     }
                 }
                 String cpfFormatado = cpfBruto.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
@@ -89,7 +110,6 @@ public class Main {
             } else {
                 String cnpjBruto = "";
                 while (true) {
-                    //Na SES já estamos integrando no BD o modelo alphanumérico, por isso eu já deixei aqui tbm rs
                     System.out.print("CNPJ: ");
                     cnpjBruto = leitor.nextLine().replaceAll("[^a-zA-Z0-9]", "");
                     if (cnpjBruto.matches("[a-zA-Z0-9]{14}")) {
@@ -211,6 +231,29 @@ public class Main {
             cliente.add(veiculo);
             cliente.getPontuacao().adicionar(100);
             listaClientes.add(cliente);
+
+            System.out.println("\n-- Gerando Ordem de Serviço para o veículo " + placa + " --");
+            Servico s1 = new Servico(1L, "LAVACAO COMPLETA", 100.0, categoria);
+            Servico s2 = new Servico(2L, "CERA", 50.0, categoria);
+
+            OrdemServico os = new OrdemServico(1L, 10.0, Status.FECHADA, new Date(), veiculo);
+
+            ItemOS item1 = new ItemOS(s1.getValor(), s1, os);
+            ItemOS item2 = new ItemOS(s2.getValor(), s2, os);
+
+            os.add(item1);
+            os.add(item2);
+
+            try {
+                os.calcularServico();
+                System.out.println("\n=================================");
+                System.out.println("       CUPOM FISCAL EMITIDO      ");
+                System.out.println("=================================");
+                ImpressaoOS impressao = new ImpressaoOS();
+                System.out.print(impressao.imprimirOS(os));
+            } catch (ExceptionLavacao e) {
+                System.out.println("\n>> Erro no cálculo da OS: " + e.getMessage());
+            }
         }
 
         System.out.println("\n=================================");
